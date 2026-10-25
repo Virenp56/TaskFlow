@@ -1,0 +1,16 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply m-0 p-0 antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    min-height: 100%;
+    /* Prevents default browser scrollbars when content fits */
+    overflow-x: hidden;
+  }
+}
