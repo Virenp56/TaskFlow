@@ -9,10 +9,17 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+// Allow credentials from your Vite frontend
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-// Mount Auth Endpoints
+// Mount Auth Endpoints (support both /api/v1/auth and /api/auth)
+app.use("/api/v1/auth", authRoutes);
 app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 5000;

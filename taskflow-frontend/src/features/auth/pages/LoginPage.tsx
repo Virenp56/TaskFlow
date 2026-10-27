@@ -28,7 +28,7 @@ export const LoginPage: React.FC = () => {
       const response = await api.post("/auth/login", { email, password });
       const { user, accessToken } = response.data.data;
       setAuth(user, accessToken);
-      navigate("/");
+      navigate(ROUTES.DASHBOARD);
     } catch (err: any) {
       setErrorMessage(
         err.response?.data?.message ||

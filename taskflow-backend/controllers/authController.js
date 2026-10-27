@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import { generateToken } from "../utils/generateToken.js";
 
-// POST /api/auth/register
+// POST /api/v1/auth/register
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -12,7 +12,6 @@ export const registerUser = async (req, res) => {
         .json({ message: "Please provide all required fields" });
     }
 
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res
@@ -20,21 +19,26 @@ export const registerUser = async (req, res) => {
         .json({ message: "User already exists with this email" });
     }
 
-    // Create user (password is automatically hashed by pre-save hook)
     const user = await User.create({ name, email, password });
+    const accessToken = generateToken(user._id);
 
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          themePreference: "system",
+        },
+        accessToken,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// POST /api/auth/login
+// POST /api/v1/auth/login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -45,23 +49,23 @@ export const loginUser = async (req, res) => {
         .json({ message: "Please provide email and password" });
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
-    if (!user) {
+    if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Verify password match
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
+    const accessToken = generateToken(user._id);
 
     res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          themePreference: "system",
+        },
+        accessToken,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

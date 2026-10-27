@@ -45,7 +45,7 @@ export const RegisterPage: React.FC = () => {
 
       const { user, accessToken } = response.data.data;
       setAuth(user, accessToken);
-      navigate("/");
+      navigate(ROUTES.DASHBOARD);
     } catch (err: any) {
       setErrorMessage(
         err.response?.data?.message || "Registration failed. Please try again."

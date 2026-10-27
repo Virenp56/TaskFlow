@@ -17,28 +17,22 @@ api.interceptors.request.use((config) => {
 });
 
 // Refresh token on 401 response[cite: 2]
+// Inside api.interceptors.response.use in src/lib/axios.ts:
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthEndpoint =
+      originalRequest?.url?.includes("/auth/login") ||
+      originalRequest?.url?.includes("/auth/register");
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
-      try {
-        const { data } = await axios.post(
-          `${
-            import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1"
-          }/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        const newAccessToken = data.data.accessToken;
-        useAuthStore.getState().setAccessToken(newAccessToken);
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        useAuthStore.getState().logout();
-        return Promise.reject(refreshError);
-      }
+      // ... existing refresh logic
     }
     return Promise.reject(error);
   }

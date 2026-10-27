@@ -1,12 +1,13 @@
 // src/stores/useAuthStore.ts
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   avatarUrl?: string;
-  themePreference: "light" | "dark" | "system";
+  themePreference?: "light" | "dark" | "system";
 }
 
 interface AuthState {
@@ -18,12 +19,20 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
-  isAuthenticated: false,
-  setAuth: (user, accessToken) =>
-    set({ user, accessToken, isAuthenticated: true }),
-  setAccessToken: (accessToken) => set({ accessToken }),
-  logout: () => set({ user: null, accessToken: null, isAuthenticated: false }),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      isAuthenticated: false,
+      setAuth: (user, accessToken) =>
+        set({ user, accessToken, isAuthenticated: true }),
+      setAccessToken: (accessToken) => set({ accessToken }),
+      logout: () =>
+        set({ user: null, accessToken: null, isAuthenticated: false }),
+    }),
+    {
+      name: "taskflow-auth",
+    }
+  )
+);
